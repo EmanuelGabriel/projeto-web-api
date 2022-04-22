@@ -4,6 +4,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 import br.com.emanuelgabriel.web.model.Pessoa;
 
+import java.util.List;
+
 public class PessoaSpecification {
 
 	/**
@@ -36,5 +38,8 @@ public class PessoaSpecification {
 		return (root, criteriaQuery, criteriaBuilder) -> 
 			criteriaBuilder.equal(root.get("idade"), idade);
 	}
+
+
+
 
 }
