@@ -14,8 +14,8 @@ public class PessoaSpecification {
 	 * @return
 	 */
 	public static Specification<Pessoa> nome(String nome) {
-		return (root, criteriaQuery, criteriaBuilder) -> 
-			criteriaBuilder.equal(root.get("nome"), nome);
+		return (root, criteriaQuery, builder) ->
+			builder.like(builder.lower(root.get("nome")), "%" + nome.toLowerCase() + "%");
 	}
 	
 	

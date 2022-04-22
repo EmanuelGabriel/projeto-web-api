@@ -26,6 +26,7 @@ public class PessoaService {
     private PessoaRepository repository;
 
     public Page<Pessoa> buscarTodos(String nome, String cpf, Integer idade, Pageable pageable) {
+        LOG.log(Level.INFO, "BuscarTodos por: nome: {0}; cpf: {1}; idade: {2}; pageNumber: {3}; pageSize: {4}", new Object[]{ nome, cpf, idade, pageable.getPageNumber(), pageable.getPageSize() });
 
         if (nome == null & cpf == null & idade == null) {
             return repository.findAll(pageable);
@@ -44,7 +45,7 @@ public class PessoaService {
      */
     public List<Pessoa> buscarPor(String nome, String cpf, Integer idadeMaior, Integer idadeMenor) {
         return repository.findAll((Specification<Pessoa>) (root, query, builder) -> {
-            LOG.log(Level.INFO, "Buscar por nome: {0}; cpf: {1}; idade: {2}", new Object[]{nome, cpf, idadeMaior, idadeMenor});
+            LOG.log(Level.INFO, "Buscar por nome: {0}; cpf: {1}; idadeMaior: {2}; idadeMenor: {3}", new Object[]{nome, cpf, idadeMaior, idadeMenor});
 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -74,6 +75,8 @@ public class PessoaService {
      * @return List<pessoa>
      */
     public List<Pessoa> filtrarPor(PessoaFiltro filtro) {
+        LOG.log(Level.INFO, "Buscar por filtro: {0}", filtro);
+
         return repository.findAll((Specification<Pessoa>) (root, query, builder) -> {
 
             List<Predicate> predicates = new ArrayList<>();
@@ -86,6 +89,7 @@ public class PessoaService {
             if (!ObjectUtils.isEmpty(filtro.getCpf())) {
                 predicates.add(builder.like(builder.lower(root.get("cpf")), "%" + filtro.getCpf().toLowerCase() + "%"));
             }
+
             if (!ObjectUtils.isEmpty(filtro.getIdade())) {
                 predicates.add(builder.equal(root.get("idade"), filtro.getIdade()));
             }
