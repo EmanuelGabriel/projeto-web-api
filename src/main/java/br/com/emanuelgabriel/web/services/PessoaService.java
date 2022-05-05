@@ -1,5 +1,7 @@
 package br.com.emanuelgabriel.web.services;
 
+import br.com.emanuelgabriel.web.dtos.response.PessoaResponseDTO;
+import br.com.emanuelgabriel.web.mappers.PessoaMapper;
 import br.com.emanuelgabriel.web.model.Pessoa;
 import br.com.emanuelgabriel.web.repository.PessoaRepository;
 import br.com.emanuelgabriel.web.repository.filter.PessoaFiltro;
@@ -25,8 +27,11 @@ public class PessoaService {
     @Autowired
     private PessoaRepository repository;
 
+    @Autowired
+    private PessoaMapper pessoaMapper;
+
     public Page<Pessoa> buscarTodos(String nome, String cpf, Integer idade, Pageable pageable) {
-        LOG.log(Level.INFO, "BuscarTodos por: nome: {0}; cpf: {1}; idade: {2}; pageNumber: {3}; pageSize: {4}", new Object[]{ nome, cpf, idade, pageable.getPageNumber(), pageable.getPageSize() });
+        LOG.log(Level.INFO, "BuscarTodos por: nome: {0}; cpf: {1}; idade: {2}; pageNumber: {3}; pageSize: {4}", new Object[]{nome, cpf, idade, pageable.getPageNumber(), pageable.getPageSize()});
 
         if (nome == null & cpf == null & idade == null) {
             return repository.findAll(pageable);
@@ -100,14 +105,13 @@ public class PessoaService {
 
 
     /**
-     *
      * @param filtro
-     * @return
+     * @return Page<PessoaResponseDTO
      */
-    public List<Pessoa> filtrarPaginadoPor(PessoaFiltro filtro, Pageable pageable) {
-        LOG.log(Level.INFO, "Busca paginada por filtro: {0}: pageNumber: {1}; pageSize: {2}", new Object[]{ filtro, pageable.getPageNumber(), pageable.getPageSize()});
+    public Page<PessoaResponseDTO> filtrarPaginadoPor(PessoaFiltro filtro, Pageable pageable) {
+        LOG.log(Level.INFO, "Busca paginada por filtro: {0};{1}", new Object[]{ filtro, pageable});
 
-        Page<Pessoa> page = repository.findAll((Specification<Pessoa>) (root, query, builder) -> {
+        Page<Pessoa> pagePessoa = repository.findAll((Specification<Pessoa>) (root, query, builder) -> {
 
             List<Predicate> predicates = new ArrayList<>();
 
@@ -123,16 +127,29 @@ public class PessoaService {
                 predicates.add(builder.equal(root.get("idade"), filtro.getIdade()));
             }
 
-            // Ordenação
+            /**
+            if (!ObjectUtils.isEmpty(filtro.getIdadeInicio())) {
+                var idadeInicio = builder.greaterThanOrEqualTo(root.get("idade"), filtro.getIdadeInicio());
+                var idadeFim = builder.lessThanOrEqualTo(root.get("idade"), filtro.getIdadeFim());
+                predicates.add(idadeInicio);
+                predicates.add(idadeFim);
+            }*/
+
+
+            if (!ObjectUtils.isEmpty(filtro.getIdadeInicio())) {
+                predicates.add(builder.between(root.get("idade"), filtro.getIdadeInicio(), filtro.getIdadeFim()));
+            }
+
+            // Ordenação feita por nome
             query.orderBy(builder.asc(root.get("nome")));
 
             return builder.and(predicates.toArray(new Predicate[0]));
         }, pageable);
 
-        page.getTotalElements();
-        page.getTotalPages();
+        pagePessoa.getTotalElements();
+        pagePessoa.getTotalPages();
 
-        return page.getContent();
+        return pessoaMapper.mapEntityPageToDTO(pageable, pagePessoa);
 
     }
 }

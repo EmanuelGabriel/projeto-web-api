@@ -12,4 +12,6 @@ public class PessoaFiltro {
     private String nome;
     private String cpf;
     private Integer idade;
+    private Integer idadeInicio;
+    private Integer idadeFim;
 }

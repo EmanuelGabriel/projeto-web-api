@@ -4,8 +4,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import br.com.emanuelgabriel.web.model.Pessoa;
 
-import java.util.List;
-
 public class PessoaSpecification {
 
 	/**
